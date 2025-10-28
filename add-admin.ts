@@ -6,9 +6,16 @@
 
 import bcrypt from 'bcryptjs'
 import { promises as fs } from 'fs'
-import { join } from 'path'
+import { join, dirname } from 'path'
+import { fileURLToPath } from 'url'
 
-const dataDir = join(process.cwd(), 'data')
+// Get the directory of this script
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+
+// Go up from add-admin.ts to project root, then to data/gdg.json
+const projectRoot = __dirname
+const dataDir = join(projectRoot, 'data')
 const dbPath = join(dataDir, 'gdg.json')
 
 interface Admin {
@@ -30,8 +37,14 @@ async function readDatabase(): Promise<Database> {
   try {
     const data = await fs.readFile(dbPath, 'utf-8')
     return JSON.parse(data)
-  } catch (error) {
-    throw new Error('Database file not found. Please run the app first to initialize it.')
+  } catch (error: any) {
+    if (error.code === 'ENOENT') {
+      console.error(`❌ Database file not found at: ${dbPath}`)
+      console.error('Please run the app first: npm run dev')
+    } else {
+      console.error('Error reading database:', error.message)
+    }
+    throw error
   }
 }
 
@@ -72,13 +85,36 @@ async function addAdmin(username: string, password: string) {
 async function main() {
   const args = process.argv.slice(2)
   
-  if (args.length !== 2) {
-    console.log('Usage: npx tsx add-admin.ts <username> <password>')
+  if (args.length < 1) {
+    console.log('Usage: npx tsx add-admin.ts <username> [password]')
     console.log('Example: npx tsx add-admin.ts john mypassword123')
+    console.log('')
+    console.log('⚠️  If password contains special characters, wrap it in quotes:')
+    console.log('    npx tsx add-admin.ts john "MyPass!123$Secure"')
+    console.log('')
+    console.log('Or run without password to be prompted securely:')
+    console.log('    npx tsx add-admin.ts john')
     process.exit(1)
   }
   
-  const [username, password] = args
+  const [username] = args
+  let password = args.slice(1).join(' ')
+  
+  // If password not provided, prompt for it
+  if (!password) {
+    const readline = require('readline')
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout
+    })
+    
+    password = await new Promise<string>((resolve) => {
+      rl.question('Enter password: ', (answer: string) => {
+        rl.close()
+        resolve(answer)
+      })
+    })
+  }
   
   if (password.length < 6) {
     console.error('❌ Password must be at least 6 characters long')
