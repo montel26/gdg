@@ -34,11 +34,17 @@ export function SpeakerForm({ speaker, onCancel }: SpeakerFormProps) {
     setIsLoading(true)
     
     try {
+      // Clean up empty company to undefined
+      const submitData = {
+        ...formData,
+        company: formData.company.trim() || undefined
+      }
+      
       if (speaker) {
-        await updateSpeaker(speaker.id, formData)
+        await updateSpeaker(speaker.id, submitData)
         alert("Speaker updated successfully!")
       } else {
-        await addSpeaker(formData)
+        await addSpeaker(submitData)
         alert("Speaker added successfully!")
       }
       onCancel()
@@ -75,13 +81,12 @@ export function SpeakerForm({ speaker, onCancel }: SpeakerFormProps) {
         </div>
       </div>
       <div>
-        <Label htmlFor="company">Company</Label>
+        <Label htmlFor="company">Company (Optional)</Label>
         <Input
           id="company"
           value={formData.company}
           onChange={(e) => setFormData({ ...formData, company: e.target.value })}
           placeholder="Google"
-          required
         />
       </div>
       <div>

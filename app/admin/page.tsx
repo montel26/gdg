@@ -210,7 +210,6 @@ export default function AdminPage() {
                       <p className="text-sm text-muted-foreground mt-1">{session.description}</p>
                       <div className="flex gap-2 mt-2">
                         <Badge variant="outline">{session.track}</Badge>
-                        <Badge variant="outline">{session.room}</Badge>
                         <Badge variant="outline">{session.startTime} - {session.endTime}</Badge>
                       </div>
                     </div>
@@ -239,7 +238,7 @@ export default function AdminPage() {
                     <div className="flex-1">
                       <h3 className="font-semibold">{speaker.name}</h3>
                       <p className="text-sm text-muted-foreground">{speaker.title}</p>
-                      <p className="text-sm text-muted-foreground">{speaker.company}</p>
+                      {speaker.company && <p className="text-sm text-muted-foreground">{speaker.company}</p>}
                     </div>
                     <div className="flex gap-2">
                       <Button variant="outline" size="sm" onClick={() => handleEditSpeaker(speaker.id)}>Edit</Button>

@@ -31,7 +31,7 @@ export function SpeakerCard({ speaker }: SpeakerCardProps) {
             <div className="flex-1 min-w-0">
               <h3 className="text-lg font-semibold leading-tight mb-1">{speaker.name}</h3>
               <p className="text-sm text-muted-foreground mb-2">{speaker.title}</p>
-              <Badge variant="secondary">{speaker.company}</Badge>
+              {speaker.company && <Badge variant="secondary">{speaker.company}</Badge>}
             </div>
           </div>
           <p className="mt-4 text-sm text-muted-foreground leading-relaxed line-clamp-2">{speaker.bio}</p>

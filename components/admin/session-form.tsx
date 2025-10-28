@@ -25,7 +25,6 @@ export function SessionForm({ session, onCancel }: SessionFormProps) {
     startTime: session?.startTime || "",
     endTime: session?.endTime || "",
     track: session?.track || "",
-    room: session?.room || "",
     speakerIds: session?.speakerIds || [],
     tags: session?.tags || [],
   })
@@ -111,31 +110,19 @@ export function SessionForm({ session, onCancel }: SessionFormProps) {
           />
         </div>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <Label htmlFor="track">Track</Label>
-          <Select value={formData.track} onValueChange={(value) => setFormData({ ...formData, track: value })}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select track" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Web">Web</SelectItem>
-              <SelectItem value="Mobile">Mobile</SelectItem>
-              <SelectItem value="AI/ML">AI/ML</SelectItem>
-              <SelectItem value="Cloud">Cloud</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label htmlFor="room">Room</Label>
-          <Input
-            id="room"
-            value={formData.room}
-            onChange={(e) => setFormData({ ...formData, room: e.target.value })}
-            placeholder="Main Hall"
-            required
-          />
-        </div>
+      <div>
+        <Label htmlFor="track">Track</Label>
+        <Select value={formData.track} onValueChange={(value) => setFormData({ ...formData, track: value })}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select track" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Web">Web</SelectItem>
+            <SelectItem value="Mobile">Mobile</SelectItem>
+            <SelectItem value="AI/ML">AI/ML</SelectItem>
+            <SelectItem value="Cloud">Cloud</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       
       <div>
@@ -153,7 +140,7 @@ export function SessionForm({ session, onCancel }: SessionFormProps) {
                   htmlFor={`speaker-${speaker.id}`}
                   className="text-sm font-normal cursor-pointer"
                 >
-                  {speaker.name} - {speaker.title} at {speaker.company}
+                  {speaker.name} - {speaker.title}{speaker.company ? ` at ${speaker.company}` : ''}
                 </Label>
               </div>
             ))

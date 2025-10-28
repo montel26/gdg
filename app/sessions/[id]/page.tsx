@@ -5,7 +5,7 @@ import { useData } from "@/lib/data-context-new"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Clock, MapPin, Users, Star, ArrowLeft } from "lucide-react"
+import { Clock, Users, Star, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { SessionReviewForm } from "@/components/session-review-form"
 import { ReviewCard } from "@/components/review-card"
@@ -80,10 +80,6 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  <span>{session.room}</span>
-                </div>
-                <div className="flex items-center gap-2">
                   <Users className="h-4 w-4" />
                   <span>{speakers.length} speaker(s)</span>
                 </div>
@@ -130,7 +126,7 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
                       <div className="flex-1 min-w-0">
                         <h3 className="text-lg font-semibold mb-1">{speaker.name}</h3>
                         <p className="text-sm text-muted-foreground mb-2">{speaker.title}</p>
-                        <Badge variant="secondary" className="mb-3">{speaker.company}</Badge>
+                        {speaker.company && <Badge variant="secondary" className="mb-3">{speaker.company}</Badge>}
                         <p className="text-sm text-muted-foreground leading-relaxed mb-4 line-clamp-3">
                           {speaker.bio}
                         </p>

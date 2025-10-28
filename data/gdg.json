@@ -1,21 +1,6 @@
 {
   "speakers": [
     {
-      "name": "Sarah Chen",
-      "title": "Senior Developer Advocate",
-      "company": "Google",
-      "bio": "Sarah is a passionate developer advocate specializing in cloud technologies and modern web development.",
-      "image": "/professional-woman-developer.png",
-      "twitter": "@sarahchen",
-      "linkedin": "sarahchen",
-      "github": "sarahchen",
-      "id": "1760554531593cuh8fyuso",
-      "rating": 5,
-      "reviewCount": 3,
-      "createdAt": "2025-10-15T18:55:31.593Z",
-      "updatedAt": "2025-10-15T18:55:31.593Z"
-    },
-    {
       "name": "Marcus Johnson",
       "title": "Lead Android Engineer",
       "company": "Spotify",
@@ -58,6 +43,21 @@
       "reviewCount": 0,
       "createdAt": "2025-10-15T18:55:31.593Z",
       "updatedAt": "2025-10-15T18:55:31.593Z"
+    },
+    {
+      "name": "Ahmed Tikiwa",
+      "title": "Senior Software Engineer",
+      "company": "N/A",
+      "bio": "I am a senior software engineer with over 12 years of experience and possess a strong passion for my community and developing world-class applications that can help make a difference. I have experience in both frontend and backend systems, where I have built enterprise solutions for major telecomunications companies. I am currently a Senior Software Engineer and an official contributor to the Google Dev Library",
+      "image": "/placeholder-user.jpg",
+      "twitter": "",
+      "linkedin": "",
+      "github": "",
+      "id": "1761660007482gnsy1czw6",
+      "rating": 0,
+      "reviewCount": 0,
+      "createdAt": "2025-10-28T14:00:07.482Z",
+      "updatedAt": "2025-10-28T14:06:13.460Z"
     }
   ],
   "sessions": [
@@ -67,10 +67,7 @@
       "startTime": "09:00",
       "endTime": "10:00",
       "track": "Web",
-      "room": "Main Hall",
-      "speakerIds": [
-        "1760554531593cuh8fyuso"
-      ],
+      "speakerIds": [],
       "tags": [
         "Next.js",
         "React",
@@ -86,7 +83,6 @@
       "startTime": "09:00",
       "endTime": "10:00",
       "track": "Mobile",
-      "room": "Room A",
       "speakerIds": [
         "1760554531593z9f0clztj"
       ],
@@ -105,7 +101,6 @@
       "startTime": "10:30",
       "endTime": "11:30",
       "track": "AI/ML",
-      "room": "Room B",
       "speakerIds": [
         "1760554531593eefl5wpqo"
       ],
@@ -124,7 +119,6 @@
       "startTime": "10:30",
       "endTime": "11:30",
       "track": "Cloud",
-      "room": "Main Hall",
       "speakerIds": [
         "17605545315936imzbewha"
       ],
@@ -143,10 +137,7 @@
       "startTime": "13:00",
       "endTime": "14:00",
       "track": "Web",
-      "room": "Main Hall",
-      "speakerIds": [
-        "1760554531593cuh8fyuso"
-      ],
+      "speakerIds": [],
       "tags": [
         "Accessibility",
         "Web",
@@ -162,7 +153,6 @@
       "startTime": "13:00",
       "endTime": "14:00",
       "track": "Mobile",
-      "room": "Room A",
       "speakerIds": [
         "1760554531593z9f0clztj"
       ],
@@ -181,10 +171,8 @@
       "startTime": "14:30",
       "endTime": "15:30",
       "track": "AI/ML",
-      "room": "Main Hall",
       "speakerIds": [
-        "1760554531593eefl5wpqo",
-        "1760554531593cuh8fyuso"
+        "1760554531593eefl5wpqo"
       ],
       "tags": [
         "AI",
@@ -201,7 +189,6 @@
       "startTime": "14:30",
       "endTime": "15:30",
       "track": "Cloud",
-      "room": "Room B",
       "speakerIds": [
         "17605545315936imzbewha"
       ],
@@ -285,12 +272,6 @@
       "username": "admin",
       "passwordHash": "$2b$10$vkfH0ADiSyJ.HpTZXMj9Wu2v8YtTT1jUE42MAPdVStCpeBAmaxBC.",
       "createdAt": "2025-10-15T18:55:31.587Z"
-    },
-    {
-      "id": "1761659440056",
-      "username": "mi",
-      "passwordHash": "$2b$10$MyYvWQDWLcq10S2veseIQ.L2o7but76PQcEsvSMY2h8zQh5DkBYqm",
-      "createdAt": "2025-10-28T13:50:40.056Z"
     },
     {
       "id": "1761659476356",

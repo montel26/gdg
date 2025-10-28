@@ -11,7 +11,8 @@ export interface Speaker {
   id: string
   name: string
   title: string
-  company: string
+  company?: string
+  
   bio: string
   image: string
   twitter?: string
@@ -30,7 +31,6 @@ export interface Session {
   startTime: string
   endTime: string
   track: string
-  room: string
   speakerIds: string[]
   tags: string[]
   createdAt: string
@@ -230,7 +230,6 @@ export async function initDatabase() {
         startTime: "09:00",
         endTime: "10:00",
         track: "Web",
-        room: "Main Hall",
         speakerIds: [createdSpeakers[0].id],
         tags: ["Next.js", "React", "Web Development"]
       },
@@ -240,7 +239,6 @@ export async function initDatabase() {
         startTime: "09:00",
         endTime: "10:00",
         track: "Mobile",
-        room: "Room A",
         speakerIds: [createdSpeakers[1].id],
         tags: ["Android", "Kotlin", "Mobile"]
       },
@@ -250,7 +248,6 @@ export async function initDatabase() {
         startTime: "10:30",
         endTime: "11:30",
         track: "AI/ML",
-        room: "Room B",
         speakerIds: [createdSpeakers[2].id],
         tags: ["Machine Learning", "TensorFlow", "AI"]
       },
@@ -260,7 +257,6 @@ export async function initDatabase() {
         startTime: "10:30",
         endTime: "11:30",
         track: "Cloud",
-        room: "Main Hall",
         speakerIds: [createdSpeakers[3].id],
         tags: ["Cloud", "Architecture", "DevOps"]
       },
@@ -270,7 +266,6 @@ export async function initDatabase() {
         startTime: "13:00",
         endTime: "14:00",
         track: "Web",
-        room: "Main Hall",
         speakerIds: [createdSpeakers[0].id],
         tags: ["Accessibility", "Web", "UX"]
       },
@@ -280,7 +275,6 @@ export async function initDatabase() {
         startTime: "13:00",
         endTime: "14:00",
         track: "Mobile",
-        room: "Room A",
         speakerIds: [createdSpeakers[1].id],
         tags: ["Kotlin", "Android", "Programming"]
       },
@@ -290,7 +284,6 @@ export async function initDatabase() {
         startTime: "14:30",
         endTime: "15:30",
         track: "AI/ML",
-        room: "Main Hall",
         speakerIds: [createdSpeakers[2].id, createdSpeakers[0].id],
         tags: ["AI", "Panel", "Future Tech"]
       },
@@ -300,7 +293,6 @@ export async function initDatabase() {
         startTime: "14:30",
         endTime: "15:30",
         track: "Cloud",
-        room: "Room B",
         speakerIds: [createdSpeakers[3].id],
         tags: ["Serverless", "Google Cloud", "Cloud Functions"]
       }

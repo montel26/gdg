@@ -19,7 +19,6 @@ export interface Session {
   startTime: string
   endTime: string
   track: string
-  room: string
   speakerIds: string[]
   tags: string[]
 }
@@ -106,7 +105,6 @@ export const sessions: Session[] = [
     startTime: "09:00",
     endTime: "10:00",
     track: "Web",
-    room: "Main Hall",
     speakerIds: ["1"],
     tags: ["Next.js", "React", "Web Development"],
   },
@@ -118,7 +116,6 @@ export const sessions: Session[] = [
     startTime: "09:00",
     endTime: "10:00",
     track: "Mobile",
-    room: "Room A",
     speakerIds: ["2"],
     tags: ["Android", "Kotlin", "Mobile"],
   },
@@ -129,7 +126,6 @@ export const sessions: Session[] = [
     startTime: "10:30",
     endTime: "11:30",
     track: "AI/ML",
-    room: "Room B",
     speakerIds: ["3"],
     tags: ["Machine Learning", "TensorFlow", "AI"],
   },
@@ -140,7 +136,6 @@ export const sessions: Session[] = [
     startTime: "10:30",
     endTime: "11:30",
     track: "Cloud",
-    room: "Main Hall",
     speakerIds: ["4"],
     tags: ["Cloud", "Architecture", "DevOps"],
   },
@@ -152,7 +147,6 @@ export const sessions: Session[] = [
     startTime: "13:00",
     endTime: "14:00",
     track: "Web",
-    room: "Main Hall",
     speakerIds: ["1"],
     tags: ["Accessibility", "Web", "UX"],
   },
@@ -163,7 +157,6 @@ export const sessions: Session[] = [
     startTime: "13:00",
     endTime: "14:00",
     track: "Mobile",
-    room: "Room A",
     speakerIds: ["2"],
     tags: ["Kotlin", "Android", "Programming"],
   },
@@ -175,7 +168,6 @@ export const sessions: Session[] = [
     startTime: "14:30",
     endTime: "15:30",
     track: "AI/ML",
-    room: "Main Hall",
     speakerIds: ["3", "1"],
     tags: ["AI", "Panel", "Future Tech"],
   },
@@ -186,7 +178,6 @@ export const sessions: Session[] = [
     startTime: "14:30",
     endTime: "15:30",
     track: "Cloud",
-    room: "Room B",
     speakerIds: ["4"],
     tags: ["Serverless", "Google Cloud", "Cloud Functions"],
   },

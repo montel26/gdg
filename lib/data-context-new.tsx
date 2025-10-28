@@ -6,7 +6,7 @@ export interface Speaker {
   id: string
   name: string
   title: string
-  company: string
+  company?: string
   bio: string
   image: string
   twitter?: string
@@ -23,7 +23,6 @@ export interface Session {
   startTime: string
   endTime: string
   track: string
-  room: string
   speakerIds: string[]
   tags: string[]
 }

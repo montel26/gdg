@@ -3,7 +3,7 @@ import { useData } from "@/lib/data-context-new"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Clock, MapPin, ExternalLink } from "lucide-react"
+import { Clock, ExternalLink } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
@@ -29,9 +29,6 @@ export function SessionCard({ session }: SessionCardProps) {
               <span className="font-medium">
                 {session.startTime} - {session.endTime}
               </span>
-              <span className="text-muted-foreground/60">•</span>
-              <MapPin className="h-4 w-4 flex-shrink-0" />
-              <span>{session.room}</span>
             </div>
             <Link href={`/sessions/${session.id}`} className="group">
               <h3 className="text-xl font-semibold leading-tight mb-2 group-hover:text-primary transition-colors">{session.title}</h3>

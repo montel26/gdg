@@ -64,9 +64,11 @@ export default function SpeakerPage({ params }: { params: Promise<{ id: string }
             <div className="flex-1">
               <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{speaker.name}</h1>
               <p className="mt-2 text-lg text-muted-foreground">{speaker.title}</p>
-              <Badge className="mt-3" variant="secondary">
-                {speaker.company}
-              </Badge>
+              {speaker.company && (
+                <Badge className="mt-3" variant="secondary">
+                  {speaker.company}
+                </Badge>
+              )}
 
               {reviewCount > 0 && (
                 <div className="mt-4 flex items-center gap-2">
@@ -124,8 +126,6 @@ export default function SpeakerPage({ params }: { params: Promise<{ id: string }
                           <span className="font-medium">
                             {session.startTime} - {session.endTime}
                           </span>
-                          <span>•</span>
-                          <span>{session.room}</span>
                         </div>
                       </div>
                       <Badge>{session.track}</Badge>

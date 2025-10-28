@@ -80,7 +80,6 @@ async function initializeDatabase() {
         startTime: "09:00",
         endTime: "10:00",
         track: "Web",
-        room: "Main Hall",
         speakerIds: [createdSpeakers[0].id],
         tags: ["Next.js", "React", "Web Development"]
       },
@@ -90,7 +89,6 @@ async function initializeDatabase() {
         startTime: "09:00",
         endTime: "10:00",
         track: "Mobile",
-        room: "Room A",
         speakerIds: [createdSpeakers[1].id],
         tags: ["Android", "Kotlin", "Mobile"]
       },
@@ -100,7 +98,6 @@ async function initializeDatabase() {
         startTime: "10:30",
         endTime: "11:30",
         track: "AI/ML",
-        room: "Room B",
         speakerIds: [createdSpeakers[2].id],
         tags: ["Machine Learning", "TensorFlow", "AI"]
       },
@@ -110,7 +107,6 @@ async function initializeDatabase() {
         startTime: "10:30",
         endTime: "11:30",
         track: "Cloud",
-        room: "Main Hall",
         speakerIds: [createdSpeakers[3].id],
         tags: ["Cloud", "Architecture", "DevOps"]
       }
