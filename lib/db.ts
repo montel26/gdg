@@ -1,19 +1,13 @@
-import { promises as fs } from 'fs'
-import { join } from 'path'
-import bcrypt from 'bcryptjs'
+import { getSql, cleanEmptyStrings } from './neon';
+import { executeQuery, executeQueryOne } from './db-queries';
+import bcrypt from 'bcryptjs';
 
-// Ensure data directory exists
-const dataDir = join(process.cwd(), 'data')
-const dbPath = join(dataDir, 'gdg.json')
-
-// Types
 export interface Speaker {
   id: string
   name: string
   title: string
   company?: string
-  
-  bio: string
+  bio?: string
   image: string
   twitter?: string
   linkedin?: string
@@ -68,452 +62,271 @@ export interface Admin {
   createdAt: string
 }
 
-interface Database {
-  speakers: Speaker[]
-  sessions: Session[]
-  events: Event[]
-  reviews: Review[]
-  admins: Admin[]
-}
-
-// Initialize database
-async function ensureDataDir() {
-  try {
-    await fs.mkdir(dataDir, { recursive: true })
-  } catch (error) {
-    // Directory already exists
-  }
-}
-
-async function readDatabase(): Promise<Database> {
-  // Skip database operations during build
-  if (process.env.NODE_ENV === 'production' && process.env.NEXT_PHASE === 'phase-production-build') {
-    return {
-      speakers: [],
-      sessions: [],
-      events: [],
-      reviews: [],
-      admins: []
-    }
-  }
-  
-  await ensureDataDir()
-  
-  try {
-    const data = await fs.readFile(dbPath, 'utf-8')
-    return JSON.parse(data)
-  } catch (error) {
-    return {
-      speakers: [],
-      sessions: [],
-      events: [],
-      reviews: [],
-      admins: []
-    }
-  }
-}
-
-async function writeDatabase(data: Database): Promise<void> {
-  // Skip database operations during build
-  if (process.env.NODE_ENV === 'production' && process.env.NEXT_PHASE === 'phase-production-build') {
-    return
-  }
-  
-  await ensureDataDir()
-  await fs.writeFile(dbPath, JSON.stringify(data, null, 2))
-}
-
-
-export async function initDatabase() {
-  const db = await readDatabase()
-  
-
-  if (db.admins.length === 0) {
-    // Use environment variables for admin credentials
-    // Create .env.local file with:
-    // ADMIN_USERNAME=your_username
-    // ADMIN_PASSWORD=your_secure_password
-    const adminUsername = process.env.ADMIN_USERNAME || 'admin'
-    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123'
-    
-    if (!process.env.ADMIN_USERNAME || !process.env.ADMIN_PASSWORD) {
-      console.warn('⚠️  WARNING: Using default admin credentials. Please set ADMIN_USERNAME and ADMIN_PASSWORD in .env.local')
-    }
-    
-    const adminPasswordHash = await bcrypt.hash(adminPassword, 10)
-    
-    const admin: Admin = {
-      id: Date.now().toString(),
-      username: adminUsername,
-      passwordHash: adminPasswordHash,
-      createdAt: new Date().toISOString()
-    }
-    
-    db.admins.push(admin)
-    console.log(`Created admin user: ${adminUsername}`)
-    console.log('✅ Admin user created. Speakers, sessions, and reviews can be added via the admin panel.')
-  } else {
-    console.log('✅ Admin user already exists.')
-  }
-  
-  // Automatic data seeding disabled 
-  // To enable seeding, remove this early return
-  await writeDatabase(db)
-  console.log('Database initialization complete!')
-  return
-
-  // Removed seeding code - uncomment below to enable automatic seeding
-  /*
-  if (db.speakers.length === 0) {
-    console.log('Seeding initial data...')
-    
-    const speakers: Omit<Speaker, 'id' | 'rating' | 'reviewCount' | 'createdAt' | 'updatedAt'>[] = [
-      {
-        name: "Sarah Chen",
-        title: "Senior Developer Advocate",
-        company: "Google",
-        bio: "Sarah is a passionate developer advocate specializing in cloud technologies and modern web development.",
-        image: "/professional-woman-developer.png",
-        twitter: "@sarahchen",
-        linkedin: "sarahchen",
-        github: "sarahchen"
-      },
-      {
-        name: "Marcus Johnson",
-        title: "Lead Android Engineer",
-        company: "Spotify",
-        bio: "Marcus has been building Android apps for over 10 years and loves sharing his knowledge with the community.",
-        image: "/professional-man-developer.png",
-        twitter: "@marcusj",
-        linkedin: "marcusjohnson",
-        github: "marcusj"
-      },
-      {
-        name: "Priya Patel",
-        title: "ML Engineer",
-        company: "DeepMind",
-        bio: "Priya specializes in machine learning and AI, with a focus on making complex topics accessible to everyone.",
-        image: "/professional-woman-engineer.png",
-        twitter: "@priyaml",
-        linkedin: "priyapatel"
-      },
-      {
-        name: "Alex Rivera",
-        title: "Cloud Architect",
-        company: "Microsoft",
-        bio: "Alex helps organizations migrate to the cloud and optimize their infrastructure for performance and cost.",
-        image: "/professional-person-cloud-architect.jpg",
-        twitter: "@alexrivera",
-        linkedin: "alexrivera",
-        github: "arivera"
-      }
-    ]
-
-    const now = new Date().toISOString()
-    const createdSpeakers = speakers.map(speaker => ({
-      ...speaker,
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-      rating: 0,
-      reviewCount: 0,
-      createdAt: now,
-      updatedAt: now
-    }))
-
-    db.speakers.push(...createdSpeakers)
-    console.log(`Created ${createdSpeakers.length} speakers`)
-
-    
-    const sessions: Omit<Session, 'id' | 'createdAt' | 'updatedAt'>[] = [
-      {
-        title: "Building Modern Web Apps with Next.js 15",
-        description: "Learn about the latest features in Next.js 15 including server components, streaming, and the new app router.",
-        startTime: "09:00",
-        endTime: "10:00",
-        track: "Web",
-        speakerIds: [createdSpeakers[0].id],
-        tags: ["Next.js", "React", "Web Development"]
-      },
-      {
-        title: "Android Development Best Practices",
-        description: "Discover the best practices for building scalable and maintainable Android applications using Kotlin and Jetpack Compose.",
-        startTime: "09:00",
-        endTime: "10:00",
-        track: "Mobile",
-        speakerIds: [createdSpeakers[1].id],
-        tags: ["Android", "Kotlin", "Mobile"]
-      },
-      {
-        title: "Introduction to Machine Learning with TensorFlow",
-        description: "Get started with machine learning using TensorFlow and learn how to build your first neural network.",
-        startTime: "10:30",
-        endTime: "11:30",
-        track: "AI/ML",
-        speakerIds: [createdSpeakers[2].id],
-        tags: ["Machine Learning", "TensorFlow", "AI"]
-      },
-      {
-        title: "Cloud Architecture Patterns",
-        description: "Explore common cloud architecture patterns and learn how to design scalable, resilient systems.",
-        startTime: "10:30",
-        endTime: "11:30",
-        track: "Cloud",
-        speakerIds: [createdSpeakers[3].id],
-        tags: ["Cloud", "Architecture", "DevOps"]
-      },
-      {
-        title: "Building Accessible Web Applications",
-        description: "Learn how to build web applications that are accessible to everyone, including users with disabilities.",
-        startTime: "13:00",
-        endTime: "14:00",
-        track: "Web",
-        speakerIds: [createdSpeakers[0].id],
-        tags: ["Accessibility", "Web", "UX"]
-      },
-      {
-        title: "Advanced Kotlin Techniques",
-        description: "Deep dive into advanced Kotlin features and learn how to write more expressive and efficient code.",
-        startTime: "13:00",
-        endTime: "14:00",
-        track: "Mobile",
-        speakerIds: [createdSpeakers[1].id],
-        tags: ["Kotlin", "Android", "Programming"]
-      },
-      {
-        title: "Panel: The Future of AI",
-        description: "Join our expert panel as they discuss the future of artificial intelligence and its impact on society.",
-        startTime: "14:30",
-        endTime: "15:30",
-        track: "AI/ML",
-        speakerIds: [createdSpeakers[2].id, createdSpeakers[0].id],
-        tags: ["AI", "Panel", "Future Tech"]
-      },
-      {
-        title: "Serverless Architecture on Google Cloud",
-        description: "Learn how to build and deploy serverless applications using Google Cloud Functions and Cloud Run.",
-        startTime: "14:30",
-        endTime: "15:30",
-        track: "Cloud",
-        speakerIds: [createdSpeakers[3].id],
-        tags: ["Serverless", "Google Cloud", "Cloud Functions"]
-      }
-    ]
-
-    const createdSessions = sessions.map(session => ({
-      ...session,
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-      createdAt: now,
-      updatedAt: now
-    }))
-
-    db.sessions.push(...createdSessions)
-    console.log(`Created ${createdSessions.length} sessions`)
-
-    // Seed event
-    const event: Event = {
-      id: Date.now().toString(),
-      name: "GDG DevFest 2025",
-      description: "Join us for a full day of talks, workshops, and networking with fellow developers in the Google Developer Group community.",
-      date: "2025-11-01",
-      location: "Johannesburg, South Africa",
-      image: "/tech-conference-event-banner.jpg",
-      createdAt: now,
-      updatedAt: now
-    }
-
-    db.events.push(event)
-    console.log('Created event')
-
-    // Seed reviews
-    const reviews: Omit<Review, 'id' | 'createdAt'>[] = [
-      {
-        speakerId: createdSpeakers[0].id,
-        userName: "John Doe",
-        userAvatar: "/placeholder.svg?key=u1",
-        rating: 5,
-        comment: "Sarah's talk on Next.js was incredibly insightful! She explained complex concepts in a way that was easy to understand.",
-        date: "2025-10-20"
-      },
-      {
-        speakerId: createdSpeakers[0].id,
-        userName: "Emily Zhang",
-        userAvatar: "/placeholder.svg?key=u2",
-        rating: 5,
-        comment: "One of the best speakers I've seen at a tech conference. Great energy and practical examples.",
-        date: "2025-10-18"
-      },
-      {
-        speakerId: createdSpeakers[1].id,
-        userName: "Lisa Anderson",
-        userAvatar: "/placeholder.svg?key=u4",
-        rating: 5,
-        comment: "Marcus is an amazing teacher! His Android workshop was hands-on and very practical.",
-        date: "2025-10-22"
-      },
-      {
-        speakerId: createdSpeakers[2].id,
-        userName: "Rachel Green",
-        userAvatar: "/placeholder.svg?key=u6",
-        rating: 5,
-        comment: "Priya made machine learning accessible and fun. Highly recommend her talks!",
-        date: "2025-10-21"
-      },
-      {
-        speakerId: createdSpeakers[3].id,
-        userName: "Sophie Martin",
-        userAvatar: "/placeholder.svg?key=u8",
-        rating: 5,
-        comment: "Alex's cloud architecture talk was exactly what I needed for my current project.",
-        date: "2025-10-23"
-      }
-    ]
-
-    const createdReviews = reviews.map(review => ({
-      ...review,
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-      createdAt: now
-    }))
-
-    db.reviews.push(...createdReviews)
-    console.log(`Created ${createdReviews.length} reviews`)
-  } else {
-    console.log('Database already has data, skipping seed')
-  }
-
-  await writeDatabase(db)
-  console.log('Database initialization complete!')
-  */ // End of commented seeding code - this section is intentionally disabled
-}
-
 // Speaker operations
 export const speakerQueries = {
   getAll: async (): Promise<Speaker[]> => {
-    const db = await readDatabase()
-    return db.speakers.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    const rows = await executeQuery<Speaker>(`
+      SELECT 
+        id, name, title, company, bio, image, twitter, linkedin, github,
+        rating, review_count as "reviewCount",
+        created_at as "createdAt", updated_at as "updatedAt"
+      FROM speakers
+      ORDER BY created_at DESC
+    `);
+    return rows;
   },
 
   getById: async (id: string): Promise<Speaker | undefined> => {
-    const db = await readDatabase()
-    return db.speakers.find(speaker => speaker.id === id)
+    const speaker = await executeQueryOne<Speaker>(`
+      SELECT 
+        id, name, title, company, bio, image, twitter, linkedin, github,
+        rating, review_count as "reviewCount",
+        created_at as "createdAt", updated_at as "updatedAt"
+      FROM speakers
+      WHERE id = $1
+    `, [id]);
+    return speaker || undefined;
   },
 
   create: async (speaker: Omit<Speaker, 'id' | 'rating' | 'reviewCount' | 'createdAt' | 'updatedAt'>): Promise<Speaker> => {
-    const db = await readDatabase()
-    const now = new Date().toISOString()
-    const newSpeaker: Speaker = {
-      ...speaker,
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-      rating: 0,
-      reviewCount: 0,
-      createdAt: now,
-      updatedAt: now
-    }
-    db.speakers.push(newSpeaker)
-    await writeDatabase(db)
-    return newSpeaker
+    const client = getSql();
+    const id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+    const now = new Date().toISOString();
+    
+    // Clean empty strings to NULL
+    const bio = cleanEmptyStrings(speaker.bio);
+    
+    await client.query(`
+      INSERT INTO speakers (
+        id, name, title, company, bio, image, twitter, linkedin, github,
+        rating, review_count, created_at, updated_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+    `, [
+      id, speaker.name, speaker.title, 
+      cleanEmptyStrings(speaker.company),
+      bio, speaker.image, 
+      cleanEmptyStrings(speaker.twitter),
+      cleanEmptyStrings(speaker.linkedin),
+      cleanEmptyStrings(speaker.github),
+      0, 0, now, now
+    ]);
+    
+    return { ...speaker, id, rating: 0, reviewCount: 0, createdAt: now, updatedAt: now };
   },
 
   update: async (id: string, updates: Partial<Speaker>): Promise<void> => {
-    const db = await readDatabase()
-    const index = db.speakers.findIndex(speaker => speaker.id === id)
-    if (index !== -1) {
-      db.speakers[index] = {
-        ...db.speakers[index],
-        ...updates,
-        updatedAt: new Date().toISOString()
+    const client = getSql();
+    const now = new Date().toISOString();
+    const fields: string[] = [];
+    const values: any[] = [];
+    let paramIndex = 1;
+    
+    const allowedFields = ['name', 'title', 'company', 'bio', 'image', 'twitter', 'linkedin', 'github'];
+    for (const [key, value] of Object.entries(updates)) {
+      if (allowedFields.includes(key) && value !== undefined) {
+        fields.push(`${key} = $${paramIndex++}`);
+        values.push(cleanEmptyStrings(value));
       }
-      await writeDatabase(db)
+    }
+    
+    if (fields.length > 0) {
+      fields.push(`updated_at = $${paramIndex++}`);
+      values.push(now);
+      values.push(id);
+      
+      await client.query(`
+        UPDATE speakers 
+        SET ${fields.join(', ')}
+        WHERE id = $${paramIndex}
+      `, values);
     }
   },
 
   delete: async (id: string): Promise<void> => {
-    const db = await readDatabase()
-    db.speakers = db.speakers.filter(speaker => speaker.id !== id)
-    // Also remove speaker from sessions
-    db.sessions = db.sessions.map(session => ({
-      ...session,
-      speakerIds: session.speakerIds.filter(speakerId => speakerId !== id)
-    }))
-    await writeDatabase(db)
+    const client = getSql();
+    await client.query('DELETE FROM speakers WHERE id = $1', [id]);
   }
 }
 
 // Session operations
 export const sessionQueries = {
   getAll: async (): Promise<Session[]> => {
-    const db = await readDatabase()
-    return db.sessions.sort((a, b) => a.startTime.localeCompare(b.startTime))
+    const rows = await executeQuery<Session>(`
+      SELECT 
+        s.id, s.title, s.description, s.start_time as "startTime",
+        s.end_time as "endTime", s.track, s.tags,
+        s.created_at as "createdAt", s.updated_at as "updatedAt",
+        ARRAY_AGG(DISTINCT ss.speaker_id) FILTER (WHERE ss.speaker_id IS NOT NULL) as "speakerIds"
+      FROM sessions s
+      LEFT JOIN session_speakers ss ON s.id = ss.session_id
+      GROUP BY s.id
+      ORDER BY s.start_time
+    `);
+    
+    // Transform the aggregated speaker IDs
+    return rows.map((row: any) => ({
+      ...row,
+      speakerIds: row.speakerIds || []
+    })) as Session[];
   },
 
   getById: async (id: string): Promise<Session | undefined> => {
-    const db = await readDatabase()
-    return db.sessions.find(session => session.id === id)
+    const rows = await executeQuery<Session>(`
+      SELECT 
+        s.id, s.title, s.description, s.start_time as "startTime",
+        s.end_time as "endTime", s.track, s.tags,
+        s.created_at as "createdAt", s.updated_at as "updatedAt",
+        ARRAY_AGG(ss.speaker_id) FILTER (WHERE ss.speaker_id IS NOT NULL) as "speakerIds"
+      FROM sessions s
+      LEFT JOIN session_speakers ss ON s.id = ss.session_id
+      WHERE s.id = $1
+      GROUP BY s.id
+    `, [id]);
+    
+    const session = rows[0];
+    if (!session) return undefined;
+    
+    return {
+      ...session,
+      speakerIds: session.speakerIds || []
+    } as Session;
   },
 
   create: async (session: Omit<Session, 'id' | 'createdAt' | 'updatedAt'>): Promise<Session> => {
-    const db = await readDatabase()
-    const now = new Date().toISOString()
-    const newSession: Session = {
-      ...session,
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-      createdAt: now,
-      updatedAt: now
+    const client = getSql();
+    const id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+    const now = new Date().toISOString();
+    
+    await client.query(`
+      INSERT INTO sessions (
+        id, title, description, start_time, end_time, track, tags, created_at, updated_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    `, [id, session.title, session.description, session.startTime, session.endTime, 
+        session.track, session.tags, now, now]);
+    
+    // Insert session-speaker relationships
+    if (session.speakerIds && session.speakerIds.length > 0) {
+      for (const speakerId of session.speakerIds) {
+        await client.query(`
+          INSERT INTO session_speakers (session_id, speaker_id)
+          VALUES ($1, $2)
+        `, [id, speakerId]);
+      }
     }
-    db.sessions.push(newSession)
-    await writeDatabase(db)
-    return newSession
+    
+    return { ...session, id, createdAt: now, updatedAt: now };
   },
 
   update: async (id: string, updates: Partial<Session>): Promise<void> => {
-    const db = await readDatabase()
-    const index = db.sessions.findIndex(session => session.id === id)
-    if (index !== -1) {
-      db.sessions[index] = {
-        ...db.sessions[index],
-        ...updates,
-        updatedAt: new Date().toISOString()
+    const client = getSql();
+    const now = new Date().toISOString();
+    
+    const { speakerIds, ...sessionUpdates } = updates;
+    
+    // Update session fields
+    if (Object.keys(sessionUpdates).length > 0) {
+      const fields: string[] = [];
+      const values: any[] = [];
+      let paramIndex = 1;
+      
+      const allowedFields = ['title', 'description', 'startTime', 'endTime', 'track', 'tags'];
+      for (const [key, value] of Object.entries(sessionUpdates)) {
+        let dbKey = key;
+        if (key === 'startTime') dbKey = 'start_time';
+        if (key === 'endTime') dbKey = 'end_time';
+        
+        if (allowedFields.includes(key) && value !== undefined) {
+          fields.push(`${dbKey} = $${paramIndex++}`);
+          values.push(value);
+        }
       }
-      await writeDatabase(db)
+      
+      if (fields.length > 0) {
+        fields.push(`updated_at = $${paramIndex++}`);
+        values.push(now);
+        values.push(id);
+        
+        await client.query(`
+          UPDATE sessions 
+          SET ${fields.join(', ')}
+          WHERE id = $${paramIndex}
+        `, values);
+      }
+    }
+    
+    // Update speaker relationships if provided
+    if (speakerIds !== undefined) {
+      await client.query('DELETE FROM session_speakers WHERE session_id = $1', [id]);
+      
+      if (speakerIds.length > 0) {
+        for (const speakerId of speakerIds) {
+          await client.query(`
+            INSERT INTO session_speakers (session_id, speaker_id)
+            VALUES ($1, $2)
+          `, [id, speakerId]);
+        }
+      }
     }
   },
 
   delete: async (id: string): Promise<void> => {
-    const db = await readDatabase()
-    db.sessions = db.sessions.filter(session => session.id !== id)
-    await writeDatabase(db)
+    const client = getSql();
+    await client.query('DELETE FROM sessions WHERE id = $1', [id]);
   }
 }
 
 // Event operations
 export const eventQueries = {
   get: async (): Promise<Event | undefined> => {
-    const db = await readDatabase()
-    return db.events[0] // Assuming single event
+    const client = getSql();
+    const rows = await client.query(`
+      SELECT 
+        id, name, description, date, location, image,
+        created_at as "createdAt", updated_at as "updatedAt"
+      FROM events
+      LIMIT 1
+    `);
+    return rows[0] as Event | undefined;
   },
 
   create: async (event: Omit<Event, 'id' | 'createdAt' | 'updatedAt'>): Promise<Event> => {
-    const db = await readDatabase()
-    const now = new Date().toISOString()
-    const newEvent: Event = {
-      ...event,
-      id: Date.now().toString(),
-      createdAt: now,
-      updatedAt: now
-    }
-    db.events = [newEvent] // Replace existing event
-    await writeDatabase(db)
-    return newEvent
+    const client = getSql();
+    const id = Date.now().toString();
+    const now = new Date().toISOString();
+    
+    await client.query(`
+      INSERT INTO events (id, name, description, date, location, image, created_at, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    `, [id, event.name, event.description, event.date, event.location, event.image, now, now]);
+    
+    return { ...event, id, createdAt: now, updatedAt: now };
   },
 
   update: async (id: string, updates: Partial<Event>): Promise<void> => {
-    const db = await readDatabase()
-    const index = db.events.findIndex(event => event.id === id)
-    if (index !== -1) {
-      db.events[index] = {
-        ...db.events[index],
-        ...updates,
-        updatedAt: new Date().toISOString()
+    const client = getSql();
+    const now = new Date().toISOString();
+    const fields: string[] = [];
+    const values: any[] = [];
+    let paramIndex = 1;
+    
+    const allowedFields = ['name', 'description', 'date', 'location', 'image'];
+    for (const [key, value] of Object.entries(updates)) {
+      if (allowedFields.includes(key) && value !== undefined) {
+        fields.push(`${key} = $${paramIndex++}`);
+        values.push(value);
       }
-      await writeDatabase(db)
+    }
+    
+    if (fields.length > 0) {
+      fields.push(`updated_at = $${paramIndex++}`);
+      values.push(now);
+      values.push(id);
+      
+      await client.query(`
+        UPDATE events 
+        SET ${fields.join(', ')}
+        WHERE id = $${paramIndex}
+      `, values);
     }
   }
 }
@@ -521,96 +334,173 @@ export const eventQueries = {
 // Review operations
 export const reviewQueries = {
   getAll: async (): Promise<Review[]> => {
-    const db = await readDatabase()
-    return db.reviews.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    const client = getSql();
+    const rows = await client.query(`
+      SELECT 
+        id, speaker_id as "speakerId", session_id as "sessionId",
+        user_name as "userName", user_email as "userEmail", user_avatar as "userAvatar",
+        rating, comment, date, created_at as "createdAt"
+      FROM reviews
+      ORDER BY created_at DESC
+    `);
+    return rows as Review[];
   },
 
   getBySpeakerId: async (speakerId: string): Promise<Review[]> => {
-    const db = await readDatabase()
-    return db.reviews
-      .filter(review => review.speakerId === speakerId)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    const client = getSql();
+    const rows = await client.query(`
+      SELECT 
+        id, speaker_id as "speakerId", session_id as "sessionId",
+        user_name as "userName", user_email as "userEmail", user_avatar as "userAvatar",
+        rating, comment, date, created_at as "createdAt"
+      FROM reviews
+      WHERE speaker_id = $1
+      ORDER BY created_at DESC
+    `, [speakerId]);
+    return rows as Review[];
   },
 
   getBySessionId: async (sessionId: string): Promise<Review[]> => {
-    const db = await readDatabase()
-    return db.reviews
-      .filter(review => review.sessionId === sessionId)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    const client = getSql();
+    const rows = await client.query(`
+      SELECT 
+        id, speaker_id as "speakerId", session_id as "sessionId",
+        user_name as "userName", user_email as "userEmail", user_avatar as "userAvatar",
+        rating, comment, date, created_at as "createdAt"
+      FROM reviews
+      WHERE session_id = $1
+      ORDER BY created_at DESC
+    `, [sessionId]);
+    return rows as Review[];
   },
 
   create: async (review: Omit<Review, 'id' | 'createdAt'>): Promise<Review> => {
-    const db = await readDatabase()
-    const now = new Date().toISOString()
-    const newReview: Review = {
-      ...review,
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-      createdAt: now
-    }
-    db.reviews.push(newReview)
+    const client = getSql();
+    const id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+    const now = new Date().toISOString();
     
-    // Update speaker rating only if this is a speaker review
+    await client.query(`
+      INSERT INTO reviews (
+        id, speaker_id, session_id, user_name, user_email, user_avatar,
+        rating, comment, date, created_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+    `, [
+      id, review.speakerId || null, review.sessionId || null,
+      review.userName, review.userEmail || null, review.userAvatar,
+      review.rating, review.comment, review.date, now
+    ]);
+    
+    // Update speaker rating if this is a speaker review
     if (review.speakerId) {
-      const speakerReviews = db.reviews.filter(r => r.speakerId === review.speakerId)
-      const avgRating = speakerReviews.reduce((sum, r) => sum + r.rating, 0) / speakerReviews.length
-      const speakerIndex = db.speakers.findIndex(s => s.id === review.speakerId)
-      if (speakerIndex !== -1) {
-        db.speakers[speakerIndex].rating = Math.round(avgRating * 10) / 10
-        db.speakers[speakerIndex].reviewCount = speakerReviews.length
-      }
+      await client.query(`
+        UPDATE speakers 
+        SET rating = (
+          SELECT ROUND(AVG(rating)::numeric, 1)
+          FROM reviews 
+          WHERE reviews.speaker_id = speakers.id
+        ),
+        review_count = (
+          SELECT COUNT(*)
+          FROM reviews 
+          WHERE reviews.speaker_id = speakers.id
+        )
+        WHERE id = $1
+      `, [review.speakerId]);
     }
     
-    await writeDatabase(db)
-    return newReview
+    return { ...review, id, createdAt: now };
   },
 
   delete: async (id: string): Promise<void> => {
-    const db = await readDatabase()
-    const review = db.reviews.find(r => r.id === id)
-    db.reviews = db.reviews.filter(r => r.id !== id)
+    const client = getSql();
     
-    // Update speaker rating only if this was a speaker review
-    if (review && review.speakerId) {
-      const speakerReviews = db.reviews.filter(r => r.speakerId === review.speakerId)
-      const avgRating = speakerReviews.length > 0 
-        ? speakerReviews.reduce((sum, r) => sum + r.rating, 0) / speakerReviews.length 
-        : 0
-      const speakerIndex = db.speakers.findIndex(s => s.id === review.speakerId)
-      if (speakerIndex !== -1) {
-        db.speakers[speakerIndex].rating = Math.round(avgRating * 10) / 10
-        db.speakers[speakerIndex].reviewCount = speakerReviews.length
-      }
+    // Get the review first to update speaker ratings
+    const rows = await client.query(`
+      SELECT speaker_id FROM reviews WHERE id = $1
+    `, [id]);
+    const speakerId = rows[0]?.speaker_id;
+    
+    await client.query('DELETE FROM reviews WHERE id = $1', [id]);
+    
+    // Update speaker rating if this was a speaker review
+    if (speakerId) {
+      await client.query(`
+        UPDATE speakers 
+        SET rating = COALESCE((
+          SELECT ROUND(AVG(rating)::numeric, 1)
+          FROM reviews 
+          WHERE reviews.speaker_id = speakers.id
+        ), 0),
+        review_count = (
+          SELECT COUNT(*)
+          FROM reviews 
+          WHERE reviews.speaker_id = speakers.id
+        )
+        WHERE id = $1
+      `, [speakerId]);
     }
-    
-    await writeDatabase(db)
   }
 }
 
 // Admin operations
 export const adminQueries = {
   getByUsername: async (username: string): Promise<Admin | undefined> => {
-    const db = await readDatabase()
-    return db.admins.find(admin => admin.username === username)
+    const client = getSql();
+    const rows = await client.query(`
+      SELECT 
+        id, username, password_hash as "passwordHash",
+        created_at as "createdAt"
+      FROM admins
+      WHERE username = $1
+    `, [username]);
+    return rows[0] as Admin | undefined;
   },
 
   create: async (admin: Omit<Admin, 'id' | 'createdAt'>): Promise<Admin> => {
-    const db = await readDatabase()
-    const newAdmin: Admin = {
-      ...admin,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString()
-    }
-    db.admins.push(newAdmin)
-    await writeDatabase(db)
-    return newAdmin
+    const client = getSql();
+    const id = Date.now().toString();
+    const now = new Date().toISOString();
+    
+    await client.query(`
+      INSERT INTO admins (id, username, password_hash, created_at)
+      VALUES ($1, $2, $3, $4)
+    `, [id, admin.username, admin.passwordHash, now]);
+    
+    return { ...admin, id, createdAt: now };
   }
 }
 
-// Initialize database on import (only in server environment)
-// Commented out to prevent multiple reinitializations during build
-// Call initDatabase() manually or via /api/init endpoint when needed
-/*
-if (typeof window === 'undefined') {
-  initDatabase().catch(console.error)
+// Initialize database (create admin if needed)
+export async function initDatabase() {
+  const client = getSql();
+  
+  // Check if admin exists
+  const admins = await client.query('SELECT COUNT(*) as count FROM admins');
+  const adminCount = admins[0].count || 0;
+  
+  if (adminCount === 0) {
+    const adminUsername = process.env.ADMIN_USERNAME || 'admin';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+    
+    if (!process.env.ADMIN_USERNAME || !process.env.ADMIN_PASSWORD) {
+      console.warn('⚠️  WARNING: Using default admin credentials. Please set ADMIN_USERNAME and ADMIN_PASSWORD in .env.local');
+    }
+    
+    const adminPasswordHash = await bcrypt.hash(adminPassword, 10);
+    const id = Date.now().toString();
+    const now = new Date().toISOString();
+    
+    await client.query(`
+      INSERT INTO admins (id, username, password_hash, created_at)
+      VALUES ($1, $2, $3, $4)
+    `, [id, adminUsername, adminPasswordHash, now]);
+    
+    console.log(`Created admin user: ${adminUsername}`);
+    console.log('✅ Admin user created. Speakers, sessions, and reviews can be added via the admin panel.');
+  } else {
+    console.log('✅ Admin user already exists.');
+  }
+  
+  console.log('Database initialization complete!');
 }
-*/
+

@@ -33,8 +33,19 @@ export async function PUT(
     const updates = await request.json()
     await speakerQueries.update(id, updates)
     return NextResponse.json({ success: true })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating speaker:', error)
+    // Check if it's a serverless database error
+    if (error?.message?.includes('serverless platforms')) {
+      return NextResponse.json(
+        { 
+          error: 'Database write operations are not configured for this environment. ' +
+                 'Please configure a database (Firestore, Supabase, etc.) for production.',
+          code: 'DATABASE_NOT_CONFIGURED'
+        },
+        { status: 501 }
+      )
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -50,8 +61,19 @@ export async function DELETE(
     const { id } = await params
     await speakerQueries.delete(id)
     return NextResponse.json({ success: true })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting speaker:', error)
+    // Check if it's a serverless database error
+    if (error?.message?.includes('serverless platforms')) {
+      return NextResponse.json(
+        { 
+          error: 'Database write operations are not configured for this environment. ' +
+                 'Please configure a database (Firestore, Supabase, etc.) for production.',
+          code: 'DATABASE_NOT_CONFIGURED'
+        },
+        { status: 501 }
+      )
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
