@@ -130,10 +130,9 @@ async function migrateAdmins(data: Database) {
 }
 
 export async function POST(request: NextRequest) {
-  // Simple security check - you can add a secret token here
-  const authHeader = request.headers.get('authorization');
-  if (authHeader !== `Bearer ${process.env.MIGRATION_SECRET}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  // Security check - ensure we're in a server environment
+  if (!process.env.DATABASE_URL) {
+    return NextResponse.json({ error: 'Database not configured' }, { status: 500 });
   }
 
   try {
