@@ -2,6 +2,8 @@
 /**
  * Script to add admin users to the database
  * Usage: npx tsx add-admin.ts <username> <password>
+ * 
+ * 
  */
 
 import bcrypt from 'bcryptjs'
