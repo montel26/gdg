@@ -1,0 +1,20 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/api/auth/check/route": "/api/auth/check",
+  "/api/auth/login/route": "/api/auth/login",
+  "/api/auth/logout/route": "/api/auth/logout",
+  "/api/events/route": "/api/events",
+  "/api/init/route": "/api/init",
+  "/api/reviews/[id]/route": "/api/reviews/[id]",
+  "/api/reviews/route": "/api/reviews",
+  "/api/sessions/[id]/route": "/api/sessions/[id]",
+  "/api/sessions/route": "/api/sessions",
+  "/api/speakers/[id]/route": "/api/speakers/[id]",
+  "/api/speakers/route": "/api/speakers",
+  "/admin/login/page": "/admin/login",
+  "/page": "/",
+  "/admin/page": "/admin",
+  "/speakers/page": "/speakers",
+  "/speakers/[id]/page": "/speakers/[id]",
+  "/sessions/[id]/page": "/sessions/[id]"
+}
