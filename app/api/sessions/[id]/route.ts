@@ -3,10 +3,11 @@ import { sessionQueries } from '@/lib/db'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await sessionQueries.getById(params.id)
+    const { id } = await params
+    const session = await sessionQueries.getById(id)
     if (!session) {
       return NextResponse.json(
         { error: 'Session not found' },
@@ -25,11 +26,12 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const updates = await request.json()
-    await sessionQueries.update(params.id, updates)
+    await sessionQueries.update(id, updates)
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error updating session:', error)
@@ -42,10 +44,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await sessionQueries.delete(params.id)
+    const { id } = await params
+    await sessionQueries.delete(id)
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error deleting session:', error)

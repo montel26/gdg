@@ -122,7 +122,7 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0">
                         <img
-                          src={speaker.avatar}
+                          src={speaker.image}
                           alt={speaker.name}
                           className="h-16 w-16 rounded-full object-cover"
                         />

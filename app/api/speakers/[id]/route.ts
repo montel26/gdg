@@ -3,10 +3,11 @@ import { speakerQueries } from '@/lib/db'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const speaker = await speakerQueries.getById(params.id)
+    const { id } = await params
+    const speaker = await speakerQueries.getById(id)
     if (!speaker) {
       return NextResponse.json(
         { error: 'Speaker not found' },
@@ -25,11 +26,12 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const updates = await request.json()
-    await speakerQueries.update(params.id, updates)
+    await speakerQueries.update(id, updates)
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error updating speaker:', error)
@@ -42,10 +44,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await speakerQueries.delete(params.id)
+    const { id } = await params
+    await speakerQueries.delete(id)
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error deleting speaker:', error)

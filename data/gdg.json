@@ -285,6 +285,18 @@
       "username": "admin",
       "passwordHash": "$2b$10$vkfH0ADiSyJ.HpTZXMj9Wu2v8YtTT1jUE42MAPdVStCpeBAmaxBC.",
       "createdAt": "2025-10-15T18:55:31.587Z"
+    },
+    {
+      "id": "1761656567144",
+      "username": "john",
+      "passwordHash": "$2b$10$.yyn33faDd7T44JW.QhaL.2G4kMgSfe.aRfQ/VfJ8ZwcebKuufPsy",
+      "createdAt": "2025-10-28T13:02:47.144Z"
+    },
+    {
+      "id": "1761656574784",
+      "username": "sarah",
+      "passwordHash": "$2b$10$hkOvjCtHS5IoEL/7z4sOzOMoGOrGoBR9ntJ/vvJau/jlytUkmKqb6",
+      "createdAt": "2025-10-28T13:02:54.784Z"
     }
   ]
 }

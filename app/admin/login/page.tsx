@@ -19,22 +19,30 @@ export default function AdminLoginPage() {
   const [error, setError] = useState("")
   const router = useRouter()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError("")
 
-    // ✅ Simple frontend validation
-    if (formData.username === "michelle" && formData.password === "Michelle!1234$Secure") {
-      // Save login state in localStorage
-      localStorage.setItem("isLoggedIn", "true")
-      router.push("/admin")
-      router.refresh()
-    } else {
-      setError("Invalid credentials")
-    }
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      })
 
-    setIsLoading(false)
+      if (response.ok) {
+        router.push("/admin")
+        router.refresh()
+      } else {
+        setError("Invalid credentials")
+      }
+    } catch (error) {
+      console.error("Login error:", error)
+      setError("An error occurred. Please try again.")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (

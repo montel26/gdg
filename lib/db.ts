@@ -129,8 +129,17 @@ export async function initDatabase() {
   
 
   if (db.admins.length === 0) {
+    // Use environment variables for admin credentials
+    // Create .env.local file with:
+    // ADMIN_USERNAME=your_username
+    // ADMIN_PASSWORD=your_secure_password
     const adminUsername = process.env.ADMIN_USERNAME || 'admin'
     const adminPassword = process.env.ADMIN_PASSWORD || 'admin123'
+    
+    if (!process.env.ADMIN_USERNAME || !process.env.ADMIN_PASSWORD) {
+      console.warn('⚠️  WARNING: Using default admin credentials. Please set ADMIN_USERNAME and ADMIN_PASSWORD in .env.local')
+    }
+    
     const adminPasswordHash = await bcrypt.hash(adminPassword, 10)
     
     const admin: Admin = {
@@ -142,9 +151,19 @@ export async function initDatabase() {
     
     db.admins.push(admin)
     console.log(`Created admin user: ${adminUsername}`)
+    console.log('✅ Admin user created. Speakers, sessions, and reviews can be added via the admin panel.')
+  } else {
+    console.log('✅ Admin user already exists.')
   }
   
+  // Automatic data seeding disabled 
+  // To enable seeding, remove this early return
+  await writeDatabase(db)
+  console.log('Database initialization complete!')
+  return
 
+  // Removed seeding code - uncomment below to enable automatic seeding
+  /*
   if (db.speakers.length === 0) {
     console.log('Seeding initial data...')
     
@@ -370,6 +389,7 @@ export async function initDatabase() {
 
   await writeDatabase(db)
   console.log('Database initialization complete!')
+  */ // End of commented seeding code - this section is intentionally disabled
 }
 
 // Speaker operations
@@ -595,6 +615,10 @@ export const adminQueries = {
 }
 
 // Initialize database on import (only in server environment)
+// Commented out to prevent multiple reinitializations during build
+// Call initDatabase() manually or via /api/init endpoint when needed
+/*
 if (typeof window === 'undefined') {
   initDatabase().catch(console.error)
 }
+*/
